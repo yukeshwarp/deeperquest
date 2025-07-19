@@ -29,6 +29,7 @@ scipy
 pydantic
 newsapi-python
 python-docx
+langchain_openai
 asyncio
 crawl4ai
 beautifulsoup4
