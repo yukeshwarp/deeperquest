@@ -1,4 +1,3 @@
-
 import os
 import asyncio
 from dotenv import load_dotenv
@@ -9,7 +8,7 @@ import requests
 import urllib.parse
 from mcp_use import MCPAgent, MCPClient
 
-HEADERS = {    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+HEADERS = {    "User-Agent": "secmcp/1.0 (yukeshwarp@docu3c.com)"
 }
 
 
@@ -162,7 +161,6 @@ def execute_step(step, context):
 
 def mcp_query_source(source, query):
     """Let the LLM (LangChain) handle reasoning and tool use, with MCP as a tool callable by the agent."""
-    from langchain_openai import AzureChatOpenAI
     # Map source to environment variable name and default URL
     mcp_env_map = {
         "newsapi": ("MCP_NEWSAPI_URL", "http://20.232.217.19:8050/sse"),
@@ -174,25 +172,27 @@ def mcp_query_source(source, query):
         return f"[MCP] Source '{source}' not supported."
     env_var, default_url = mcp_env_map[source]
     url = os.getenv(env_var, default_url)
-    config = {
-        "mcpServers": {
-            source: {
-                "url": url,
-                "type": "http"
-            }
-        }
+    if not url:
+        return f"[MCP] Endpoint URL for '{source}' is not set. Please set {env_var} in your environment."
+    payload = {
+        "jsonrpc": "2.0",
+        "method": f"{source}_search",
+        "params": {"query": query},
+        "id": 1
     }
-    async def run_agent():
-        client = MCPClient.from_dict(config)
-        llm = AzureChatOpenAI(
-            openai_api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            deployment_name="gpt-4.1",
-            api_version="2025-03-01-preview",
-            model="gpt-4.1"
-        )
-        agent = MCPAgent(llm=llm, client=client, max_steps=30)
-        quest = f"Get details about {query}"
-        result = await agent.run(quest)
-        return result
-    return asyncio.run(run_agent())
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": HEADERS["User-Agent"]
+    }
+    try:
+        resp = requests.post(url, json=payload, headers=headers, timeout=20)
+        if resp.status_code != 200:
+            return f"[MCP] Error: {source} server returned status {resp.status_code}"
+        data = resp.json()
+        if "error" in data:
+            return f"[MCP] Error: {data['error']}"
+        return data.get("result", "[MCP] No result returned.")
+    except Exception as e:
+        logging.error(f"MCP {source} call failed: {e}")
+        return f"[MCP] Exception: {str(e)}"
