@@ -16,7 +16,7 @@ def plan_research(query, max_steps=20):
         f"User Query: {query}"
     )
     response = client.chat.completions.create(
-        model="model-router",
+        model="gpt-4.1",
         messages=[
             {"role": "system", "content": "You are a research planning assistant."},
             {"role": "user", "content": plan_prompt},
@@ -48,7 +48,7 @@ def replanner(context, steps, replan_rounds, max_replan_rounds, replan_limit_rea
         f"Do not return already present steps in the new plan.\n\n"
     )
     replan_response = client.chat.completions.create(
-        model="model-router",
+        model="gpt-4.1",
         messages=[
             {"role": "system", "content": "You are a research planning assistant."},
             {"role": "user", "content": replan_prompt},
