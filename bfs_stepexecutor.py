@@ -93,7 +93,7 @@ def execute_step(step, context):
         {"role": "user", "content": exec_prompt},
     ]
     response = client.chat.completions.create(
-        model="model-router", messages=messages, functions=functions, function_call="auto"
+        model="gpt-4.1", messages=messages, functions=functions, function_call="auto"
     )
     msg = response.choices[0].message
     name = getattr(response, 'model', None)
@@ -118,7 +118,7 @@ def execute_step(step, context):
         messages.append(
             {"role": "function", "name": fn_name, "content": web_results}
         )
-        response2 = client.chat.completions.create(model="model-router", messages=messages)
+        response2 = client.chat.completions.create(model="gpt-4.1", messages=messages)
         return response2.choices[0].message.content
     else:
         return msg.content
