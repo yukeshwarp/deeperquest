@@ -166,7 +166,7 @@ def mcp_query_source(source, query):
         "newsapi": ("MCP_NEWSAPI_URL", "http://20.232.217.19:8050/sse"),
         "wikipedia": ("MCP_WIKIPEDIA_URL", "http://172.210.93.168:8053/sse"),
         "arxiv": ("MCP_ARXIV_URL", "http://20.232.76.152:8950/sse"),
-        "google": ("MCP_GOOGLE_URL", "http://52.188.135.124:8051/sse"),
+        "google": ("MCP_GOOGLE_URL", "http://52.224.133.79:8051/sse"),
     }
     if source not in mcp_env_map:
         return f"[MCP] Source '{source}' not supported."
